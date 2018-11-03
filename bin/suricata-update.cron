@@ -1,0 +1,3 @@
+#suricata-update --reload-command "service suricataips restart" -v -f
+suricata-update --reload-command "service suricataips restart"  -v
+

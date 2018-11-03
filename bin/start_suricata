@@ -1,0 +1,3 @@
+/usr/local/bin/trafr -s | /usr/bin/suricata -c /etc/suricata/suricata.yaml --pidfile /var/run/suricata.pid  -r /dev/stdin &
+
+

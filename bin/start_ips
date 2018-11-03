@@ -1,0 +1,6 @@
+cd /var/www/html/suricata2mikrotik/
+php bin/daemon_ips_hunter.php &
+sleep 1;
+php bin/daemon_ips_process.php &
+sleep 1;
+php bin/daemon_ips_clean.php &
