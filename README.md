@@ -1,4 +1,4 @@
-# Suricata2MikroTik
+# Suricata2MikroTik CE -Community Edition-
 
 Module for Suricata to read eve.json file and looking for specified alerts. If found it, then connect to router MikroTik via API and block the Attack with Firewall.
 
@@ -7,7 +7,7 @@ This is similar like ips-mikrotik-suricata  but works with eve.json and not with
 
 # Changelog:
 
-31 Octubre 18: v1.0
+31 Octubre 18: Community Edition v1.0 
 
 * Init version
 
