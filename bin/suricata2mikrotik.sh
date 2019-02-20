@@ -25,12 +25,12 @@ case "$1" in
     ;;
     restart)
         $0 stop
-        sleep 2
+        sleep 11
         $0 start
     ;;
     
   *)
-    echo "Usage: /etc/init.d/suricata2mikrotik {start|stop}"
+    echo "Usage: /etc/init.d/suricata2mikrotik {start|stop|restart}"
     exit 1
     ;;
 esac

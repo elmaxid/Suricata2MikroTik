@@ -1,4 +1,13 @@
 <?php
+
+$dir_panel_share = realpath(dirname(__FILE__) . '/');
+set_include_path(get_include_path() . PATH_SEPARATOR . $dir_panel_share."/"); #share
+set_include_path(get_include_path() . PATH_SEPARATOR . $dir_panel_share."/ssh/"); #ssh
+
+
+define('VERSION', 'v1.1');
+
+
 /**
  * [is_cli Check if environment is cli]
  * @return boolean [description]
@@ -79,25 +88,21 @@ function insert_db($dbname = NULL, $datos = NULL, $delayed = false)
     if ($delayed) $sql.= " delayed ";
     $sql.= " INTO $dbname   ";
     foreach($datos as $key => $valor)
+
         {
         $sql_init.= "`" . $key . "`,";
         $sql_final.= "'" . $valor . "',";
-
-        //    $sql_duplicate.=" `".$key."`='". $valor."' ,";
-
         } //$datos as $key => $valor
+
     $sql_init = substr($sql_init, 0, -1);
     $sql_final = substr($sql_final, 0, -1);
 
-    // $sql_duplicate=substr( $sql_duplicate, 0, -1 );
-
+ 
     $sql.= " ( " . $sql_init . " ) VALUES (" . $sql_final . ")   ;";
 
     // echo $sql;
 
     $result = $connect->query($sql);
-
-    // $result = mysql_query( $sql );
 
     if ($connect->error)
         {
@@ -107,7 +112,7 @@ function insert_db($dbname = NULL, $datos = NULL, $delayed = false)
         {
         return (true);
         } //$result
-      else
+    else
         {
         return (false);
         }
@@ -120,7 +125,7 @@ function mysql_con()
     $i = 0;
     while ($i < 100)
         {
-        $connect = new mysqli($cfg[db_server], $cfg[db_user_name], $cfg[db_password], $cfg[db_database]);
+        $connect = new mysqli($cfg['db_server'], $cfg['db_user_name'], $cfg['db_password'], $cfg['db_database']);
         if ($connect->connect_error > 0)
             {
             print ('Unable to connect to database [' . $connect->connect_error . ']');
@@ -224,10 +229,12 @@ function partial_search_array_special($haystack, $needle)
  * @return [type] [description]
  */
 
-function get_total_rules_active()
+function get_total_rules_active($status=false)
     {
     global $connect;
-    $SQL = "SELECT count(*) as TOTAL FROM `block_queue`;";
+    $SQL = "SELECT count(*) as TOTAL FROM `block_queue` ";
+    if (is_numeric($status)) $SQL.=" WHERE que_processed='".$status."' ;";
+    // echo $SQL;
     if (!$result = $connect->query($SQL))
         {
         die('There was an error running the query [' . $connect->error . ']');
@@ -526,7 +533,7 @@ function show_credits()
                                 MKE Solutions
                                </div>
                                <div class="panel-body">
-                                 <p> <b>Suricata2Mikrotik CE v1.0</b> -Community Edition- </p>
+                                 <p> <b>Suricata2Mikrotik CE</b> -Community Edition- '.VERSION.' </p>
                                 <p>   Designed by <a href="http://maxid.com.ar" target="_blank">Maximiliano Dobladez</a></p>
                                </div>
                            </div>';

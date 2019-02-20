@@ -1,32 +1,31 @@
-# Suricata2MikroTik CE -Community Edition-
+# Suricata2MikroTik
 
 Module for Suricata to read eve.json file and looking for specified alerts. If found it, then connect to router MikroTik via API and block the Attack with Firewall.
 
 This is similar like ips-mikrotik-suricata  but works with eve.json and not with barnyard2. https://github.com/elmaxid/ips-mikrotik-suricata
 
 
-# Changelog:
-
-31 Octubre 18: Community Edition v1.0 
+Changelog:
+18 February 19: v1.1: Add SSH Support
+31 October 18: v1.0
 
 * Init version
 
 
-# Requeriment:
+Requeriment:
 
 * Suricata 
 * IP and login for router MikroTik RouterOS
 * GIT
 
-# Features
+** Features
 
 * Detect an Alert from Suricata and connect to RouterOS to block de Attack source IP Address
-
-# Notification:
+* Notification:
         * Email
         * Telegram (API Bot)
 
-# Instalation
+Instalation
 
 Once we have Suricata working and running on our network, the next step is the instalation of Suricata2MikroTik:
 
@@ -54,6 +53,6 @@ chmod +x /usr/local/bin/start*
 
 ----
 
-# How works it
+How work it
 
 For run Suricata, you need to redirect the traffic from MikroTik RouterOS to Suricata server, to do it just use Packet Sniffer or  Mangle Send To TZSP Action.

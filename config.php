@@ -17,7 +17,7 @@
  * v1.0 -   initial version
  ******************************/
 
-define('VERSION', '1.0');
+define('VERSION', '1.1');
 #
 # Reload Rules suricata
 #kill -USR2 $(pidof suricata)
@@ -27,7 +27,7 @@ define('VERSION', '1.0');
 // header( 'Content-Type: text/plain' );
 $cfg['db_user_name']    = "root";
 /* Database username */
-$cfg['db_password']     = "xxxxxx";
+$cfg['db_password']     = "p4c0tilla";
 /* Database password */
 $cfg['db_database']     = "suricata2ips";
 $cfg['db_server']       = "localhost";
@@ -48,16 +48,22 @@ $active_mail_report=false;
 $cfg[ 'whitelist' ] = array(
     '10.0.0.0/8',
     '192.168.0.0/16',
-    '172.16.0.0/16' 
+    '172.16.0.0/16',
+    '0.0.0.0' #bugfix
     ); 
 
 # Time in minutes to restart API connection 
 # Tiempo para reiniciar la conexión API 
+
 $router['restart_conn_time'] = 5; 
 
+// $router['conn']="API"; //API o SSH
+// $router['ip']="10.200.200.1"; //IP Router
 
+$router['conn'] = "SSH"; //API o SSH
+$router['ip']   = "192.168.10.1"; //IP Router
+$router['user'] = "api"; // user login
+$router['pass'] = "api123";  //pass
+$router['port'] = "22";  //port ssh
 
-
-$router['ip']="192.168.10.1"; //IP Router
-$router['user']="api"; // user login
-$router['pass']="api123";  //pass
+$router['address_list_block'] = "Blocked";  //Address list to add blocked IP

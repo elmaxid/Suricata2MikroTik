@@ -1,7 +1,7 @@
 <?php
 /*****************************
  *
- * Suricata2MikroTik IPS v1.0
+ * Suricata2MikroTik IPS 
  * 
  * Daemon to looking for specifics Alerts and block the source o target.
  * 
@@ -29,7 +29,15 @@ if (!is_cli()){
 
 mysql_con();
   
- 
+#Abrir el json
+#
+#chequear si es un alerta y si esta en la lista de bloquear
+#chequear si es un whilelist 
+#   sino > bloquear
+#   
+#   conectarse via API
+#   conectarse via SSH
+#   
 #   TODO: Hacer que se quede la regla o se borre con el clean
 
 
@@ -88,10 +96,24 @@ while(!feof($handle)) {
                         $datos_to_db[json_raw]=serialize($array);
                         insert_db( 'block_queue', $datos_to_db  );
 
-                        _log("Alert Found: ". $datos_to_db[que_sig_name]. " FROM ".$array['src_ip']. " TO: ".$array['dest_ip']);
+                     if ( $DEBUG )      _log("Alert Found: ". $datos_to_db[que_sig_name]. " FROM ".$array['src_ip']. " TO: ".$array['dest_ip']);
 
 
- 
+
+                   // echo var_dump($datos_to_db)."BLOCK <br/>\n";;
+
+                    // echo "BLOCKEDDD.......".$need_block." \n";
+                  /*     echo "<table width='90%' valign='top' align='center'>
+                        <tr bgcolor = '#CACACA'>
+                        <td width='220px'>" . $fixed . "</td>
+                        <td width='150px'>" . $array['src_ip'] . "</td>
+                        <td width='50px'>" . $array['src_port'] . "</td>
+                        <td width='150px'>" . $array['dest_ip'] . "</td>
+                        <td width='50px'>" . $array['dest_port'] . "</td>
+                        <td width='360px'>" . $array['alert']['signature'] . "</td>
+                        <td width='260px' align='center'> - </td>
+                        <td width='360px' align='center'> - </td>
+                        </tr></table>\n";*/
             
                  }
 

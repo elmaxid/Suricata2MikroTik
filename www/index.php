@@ -4,7 +4,7 @@
   *
  * This file is the webgui for update and manager rules of project:
  *
- * https://github.com/elmaxid/Suricata2MikroTik *
+ * https://github.com/elmaxid/suricata2mikrotik
  * 
  * Author: Maximiliano Dobladez info@mkesolutions.net
  *
@@ -14,7 +14,7 @@
  * LICENSE: GPLv2 GNU GENERAL PUBLIC LICENSE
  *
  * 
- * v1.0 -   initial version
+ * v1.0 - 13 April 17 - initial version
  ******************************/
 error_reporting( E_ALL );
 error_reporting( 0 );
@@ -66,7 +66,8 @@ if ( isset( $_REQUEST[ 'timeout' ] ) )
         {
         if ($cmd == "check_connect_router_API")
             {
-            echo check_connect_router_API();
+            // echo check_connect_router_API();
+               echo "<span class='label label-success lead'>".$router['conn']."</span>";
             }
         elseif ($cmd == "edit_rule_save")
             {
@@ -122,9 +123,11 @@ if ( isset( $_REQUEST[ 'timeout' ] ) )
         elseif ($cmd == "update")
         {     echo show_finish_loading();
               echo show_suricata_update_rules();
-        }   elseif ($cmd == "run_suricata_update")
-        {     echo run_suricata_update_rules();
-             
+        }   
+        elseif ($cmd == "run_suricata_update")
+        {     
+             set_time_limit(0);
+             echo run_suricata_update_rules();
         }
 
 
@@ -159,8 +162,43 @@ function show_finish_loading() {
   <link href="a.css" rel="stylesheet" media="screen">
 
    <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"  >
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
+<style type="text/css">
+hr {
+    margin-top: 0px !important;
+  height: 4px;
+  margin-left: 15px;
+  margin-bottom:-3px;
+}
+.hr-warning{
+  background-image: -webkit-linear-gradient(left, rgba(210,105,30,.8), rgba(210,105,30,.6), rgba(0,0,0,0));
+}
+.hr-success{
+  background-image: -webkit-linear-gradient(left, rgba(15,157,88,.8), rgba(15, 157, 88,.6), rgba(0,0,0,0));
+}
+.hr-primary{
+  background-image: -webkit-linear-gradient(left, rgba(66,133,244,.8), rgba(66, 133, 244,.6), rgba(0,0,0,0));
+}
+.hr-danger{
+  background-image: -webkit-linear-gradient(left, rgba(244,67,54,.8), rgba(244,67,54,.6), rgba(0,0,0,0));
+}
 
+.breadcrumb {
+  background: rgba(245, 245, 245, 0); 
+  border: 0px solid rgba(245, 245, 245, 1); 
+  border-radius: 25px; 
+  display: block;
+  padding: 0px ; 
+  margin-bottom: 10px; 
+}
+
+.btn-bread{
+    margin-top:10px;
+    font-size: 12px;
+    
+    border-radius: 3px;
+}</style>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -205,13 +243,17 @@ function show_finish_loading() {
 
         <aside class="sidebar">
             <ul class="sidebar-nav">
-                <li><a onclick=" get_data('?c=dashboard','central');" href="#"><i class="fa fa-dashboard"></i> <span>Active Blocked Rules</span></a></li>
+                <li><a rel="tooltip" title="Dashboard" onclick=" get_data('?c=dashboard','central');" href="#"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
             
-                <li><a href="#" onclick=" get_data('?c=list_alert_found','central'); "><i class="fa fa-search"></i> <span>Suricata Alerts Found</span></a></li>
+                <li><a href="#" rel="tooltip" title="List Alerts found" onclick=" get_data('?c=list_alert_found','central'); "><i class="fa fa-search"></i> <span>Suricata Alerts Found</span></a></li>
 
- <li><a href="#" onclick=" get_data('?c=list_rule','central'); "><i class="fa fa-edit"></i> <span>Rules Editor</span></a></li>
- <li><hr></li>
- <li><a href="#" onclick=" get_data('?c=update','central'); "><i class="fa fa-download"></i> <span>Update Rules</span></a></li>
+                 <li><a href="#" rel="tooltip" title="Edit Alert to Search" onclick=" get_data('?c=list_rule','central'); "><i class="fa fa-edit"></i> <span>Rules Editor</span></a></li>
+                 
+                 <li><hr></li>
+                 
+                 <li><a href="#" rel="tooltip" title="Update Rules" onclick=" get_data('?c=update','central'); "><i class="fa fa-download"></i> <span>Update Rules</span></a></li> 
+
+                 <li><a href="#" rel="tooltip" title="Settings" onclick=" get_data('?c=settings','central'); "><i class="fa fa-cogs"></i> <span>Settings</span></a></li>
 
             </ul>
         </aside>
@@ -271,6 +313,13 @@ function show_finish_loading() {
 
 function show_tooltip( ) {
     return '  <script type="text/javascript"> $(function () {  $("[rel=\'tooltip\']").tooltip({html:true});  }); </script>';
+}
+function highlight_rule($text) {
+    $str_tmp=explode(' ',$text);
+    $keyword = "$str_tmp[0]#$str_tmp[1]#";
+    $keyword = implode('|',explode('#',preg_quote($keyword)));
+    $str = preg_replace("/($keyword)/i","<b>$0</b>",$text);
+     return $str;
 }
 function show_active_rules_db( ) {
     global $connect;
@@ -526,7 +575,9 @@ function show_dashboard( ) {
         die( 'There was an error running the query [' . $connect->error . ']' );
     } //!$result = $connect->query( $SQL )
     // $count = $result->num_rows;
-   $count = get_total_rules_active();
+   $count_total = get_total_rules_active();
+   $count_new = get_total_rules_active(0);
+   $count_blocked = get_total_rules_active(1);
     $str .= ' <div class="row">
                        
                          
@@ -534,7 +585,12 @@ function show_dashboard( ) {
                        <div class="col-xs-12 col-sm-7">
                            <div class="panel panel-default">
                                <div class="panel-heading">
-                                Active Alert Blocked (' . $count . ')  - Time: ' . date( "H:i:s", time() ) . '
+                                Active Alert Blocked    
+                                <span class="pull-right hidden-sm hidden-xs">
+                                Total: <span class="label label-default">' . $count_total . '</span>
+                                Queued: <span class="label label-default">' . $count_new . '</span>
+                                Blocked: <span class="label label-default">' . $count_blocked . '</span>
+                                </span>
                                </div>
                                <div class="panel-body" style=" max-height: 900px;
             overflow:auto;">
@@ -546,7 +602,7 @@ function show_dashboard( ) {
                                     </thead>
                                     <tbody>   ';
     while ( $row = $result->fetch_assoc() ) {
-        $str .= '<tr><td> ' . format_fecha( $row[ 'que_event_timestamp' ] ) . '</td> <td>' . view_whois_ip($row[ 'ip' ]) . '</td><td >' . $row[ 'que_sig_name' ] . '</td><td class="hidden-xs"><a target=_blank rel=tooltip title="View Rule Alert" href=http://doc.emergingthreats.net/' . $row[ 'que_sig_sid' ] . '>' . $row[ 'que_sig_sid' ] . '</a></small></td><td class="hidden-xs">
+        $str .= '<tr><td> ' . format_fecha( $row[ 'que_event_timestamp' ] ) . '</td> <td>' . view_whois_ip($row[ 'ip' ]) . '</td><td >' . highlight_rule($row[ 'que_sig_name' ]) . '</td><td class="hidden-xs"><a target=_blank rel=tooltip title="View Rule Alert" href=http://doc.emergingthreats.net/' . $row[ 'que_sig_sid' ] . '>' . $row[ 'que_sig_sid' ] . '</a></small></td><td class="hidden-xs">
 
         <a class="btn btn-xs btn-default" id="view_event" target=_blank href=# data-cid="index.php?c=view_event&que_id=' . $row[ 'que_id' ] . '" title="View Event" rel="tooltip" ><i class="fa fa-eye"></i></a>
 
@@ -677,21 +733,32 @@ function show_server_status( ) {
     $data = obtiene_server_status();
     
     // echo var_dump($data);
-    $str .= '  <div class="row">
+    $str .= '  <div class="row"  >
                          <div class="col-xs-12 col-sm-2">
                             <div class="panel panel-primary">
-                                <div class="panel-body">
-                                  <h4 class="text-center"><strong><i class="fa fa-shield"></i> Suricata2MikroTik IPS </strong>  </h4> 
+                                <div class="panel-body" style="padding: 5px!important ">  <hr class="hr-primary" />
+                                  <h4 class="text-center"> <i class="fa fa-shield"></i> Suricata2MikroTik <span class="hidden-md hidden-xs hidden-sm" >IPS </span>  </h4> 
+                                    
                                 </div>
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-6">
                             <div class="panel panel-primary">
-                                <div class="panel-body">
-                                 <i class="fa fa-square"></i> Uptime  <strong class="lead">' . $data[ server_uptime ] . '</strong>  &nbsp;&nbsp;
-                                  <i class="fa fa-square"></i>  Load Avr: <strong class="lead">' . $data[ loadAvg ] . '</strong> &nbsp;&nbsp;
-                                  <i class="fa fa-square"></i>  MEM Free: <strong class="lead">' . $data[ memPercent ] . '%</strong>  
-                                   
+                                <div class="panel-body"  style="padding: 7px!important "> <hr class="hr-primary" />
+                                <ol class="breadcrumb text-center" style="margin-top: 7px!important ">
+                                    <li class="active">  TIME: <i class="" style="background-color:#f0f0f0;padding:4px">' . date( "H:i:s", time() ) . '</i></li>
+
+                                    <li class="active">
+                                          UPTIME:  <i class="" style="background-color:#f0f0f0;padding:4px">' . $data[ server_uptime ] . '</i> 
+                                    </li>
+                                    <li class="active">
+                                            LOAD AVR: <i class="" style="background-color:#f0f0f0;padding:4px">' . $data[ loadAvg ] . '</i>
+                                    </li>
+                                    <li class="active">    MEM USED: <i class="" style="background-color:#f0f0f0;padding:4px">' . $data[ memPercent ] . '%</i></li>
+
+
+                                </ol>
+                           
                                 </div>
                             </div>
                         </div>
@@ -699,10 +766,10 @@ function show_server_status( ) {
                         <div class="col-xs-12 col-sm-4">
                             <div class="panel panel-primary">
                                 <div class="panel-body">
-                                  <strong> Suricata IDS: </strong><span class="lead">' . check_service_running( 'ids' ) . ' </span> &nbsp;&nbsp;
+                                  <strong> Suricata : </strong><span class="lead">' . check_service_running( 'ids' ) . ' </span> &nbsp;&nbsp;
                                 
                                 <strong>   IPS Daemon: </strong> <span class="lead">' . check_service_running( 'ips' ) . '  </span> &nbsp;&nbsp; 
-                                <strong>   API: </strong> <span class="lead" id="check_connect_router_API"> <i class="fa fa-refresh fa-spin"></i> </span>  
+                                <strong> CONN: </strong> <span class="lead" id="check_connect_router_API"><i class="fa fa-refresh fa-spin"></i></span>  
 
                                 </div>
                             </div>
@@ -744,9 +811,9 @@ function show_alert_found(){
 
         <div class="panel panel-default">
   
-            <div class="panel-heading">Alerts Rule Found</div>
+            <div class="panel-heading">Alerts Rule Found </div>
             <div class="panel-body">
-                <p>Last Alert Found at Eve.json - Suricata File</p>
+                <p>Last Alert Found at <b>Eve.json</b> - Suricata File</p>
                 <div class="btn-toolbar">
                     <div class="btn-group">
                       <button onclick=" get_data(\'?c=list_alert_found\',\'central\'); " type="button" class="btn btn-xs btn-default">ALL</button>
@@ -833,38 +900,59 @@ function show_suricata_update_rules(){
        
         <div class="panel-body">
              <div class="col-md-12">
-        <h3><span id="title_loading">Loading data... Please wait.</span></h3>
-        <div class="progress progress-striped active page-progress-bar">
-            <div class="progress-bar" style="width: 100%;"></div>
-        </div>
+       <span id="title_loading"> <h3><i class="fa fa-download "></i> Suricata-update > Update Alerts Rules.</h3></span>
+       <p>Press Start to Update Rules</p>
         </div>
         <div class="col-md-12"> 
-         <script type="text/javascript">
-                      $(document).ready(function(){return $.ajax({type:"POST",url:"index.php?c=run_suricata_update",success:function(a){$("#show_div_update").html(a)}}),!1});
-                        </script>
-            <span id="show_div_update"></span>
+         
+        <input type="button" class="btn btn-default btn-default" onclick="helper()" value="Start">
+        <input type="button" class="btn btn-default btn-default" onclick="kill()" value="Stop">
+        <div id="foo"></div>
+          
+            <iframe id="show_div_update" style="width:100%;height:700px;" ></iframe><br />
+                    <script>
+                    function helper() {
+                        document.getElementById(\'show_div_update\').src = \'index.php?c=run_suricata_update\';
+                    }
+                    function kill() {
+                        document.getElementById(\'show_div_update\').src = \'\';
+                    }
+                    </script>
+
+
+              <span id="show_div_update"></span>
+
+
+
         </div>
 
         </div>
     </div>';
 }
+
+/**
+ *  TODO: Mejorar el directorio del script
+ * 
+ * [run_suricata_update_rules ejecuta el suracata-update]
+ * @return [type] [description]
+ */
 function run_suricata_update_rules() {
         echo show_finish_loading();
+        echo "<pre>";
         ob_flush();
         flush();
        $handle = popen("cd /var/www/html/suricata2mikrotik/bin/; ./php_root /var/www/html/suricata2mikrotik/bin/suricata-update.cron    2>&1", 'r');
         
         while(!feof($handle)) {
                 $buffer = fgets($handle);
-                echo "$buffer<br/>\n";
+                echo htmlspecialchars($buffer)."";
                 ob_flush();
                 flush();
         }
         pclose($handle);
 
-        echo '<script type="text/javascript">
-                       $("#title_loading").html(\'OK - Finished\')} 
-                        </script>';
-
+        echo '<script> document.getElementById("title_loading").innerHTML "<h3>OK - Finished</h3>"</script>';
+        ob_flush();
+        flush();
 }
 ?>

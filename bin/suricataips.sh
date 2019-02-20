@@ -25,12 +25,12 @@ case "$1" in
     ;;
    restart)
         $0 stop
-        sleep 2
+        sleep 5
         $0 start
     ;;
     
   *)
-    echo "Usage: /etc/init.d/suricata {start|stop}"
+    echo "Usage: /etc/init.d/suricataips {start|stop|restart}"
     exit 1
     ;;
 esac
