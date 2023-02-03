@@ -1,7 +1,7 @@
 <?php
 /*****************************
  *
- * RouterOS PHP API class v1.6
+ * RouterOS PHP API class v1.6 OLD
  * Author: Denis Basta
  * Contributors:
  *    Nick Barnes
